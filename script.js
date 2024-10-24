@@ -1,5 +1,7 @@
 let $healthBars = document.getElementById('healthBars')
 let $input = document.getElementById('input')
+let $blackGradient = document.querySelector('.blackGradient')
+let $portrait = document.getElementById('portrait')
 
 $input.addEventListener('keyup', e => {
     if (e.key === 'Enter') {
@@ -17,6 +19,9 @@ $input.addEventListener('keyup', e => {
                 break;
             case 'add':
                 addHealthBar(data[1], data[2], parseInt(data[3]));
+                break;
+            case 'clear':
+                clearDamage(data[1]);
                 break;
         }
         
@@ -37,6 +42,7 @@ function addHealthBar(id, name, hp) {
     <div class="hp"></div>
     <div class="hpGhost"></div>
 </div>`
+    
     $healthBars.appendChild($boss)
 
     bosses[id] = {
@@ -47,6 +53,12 @@ function addHealthBar(id, name, hp) {
     }
 
     updateBar(id)
+
+    if (Object.keys(bosses).length > 0) {
+        $blackGradient.classList.add('screenDown')
+    }
+
+    $portrait.classList.add('show')
 }
 
 function damage(name, amount) {
@@ -81,12 +93,20 @@ function heal(name, amount) {
     boss.el.classList.add('healing')
     setTimeout(()=> {
         boss.el.classList.remove('healing')
-    }, 4000)
+    }, 5000)
 
-    boss.el.querySelector('.damageText').dataset.damage = 0
-    boss.el.querySelector('.damageText').innerHTML = ''
+    let damage = boss.el.querySelector('.damageText').dataset.damage
+    damage = parseInt(damage) - parseInt(amount)
+    boss.el.querySelector('.damageText').innerHTML = damage
+    boss.el.querySelector('.damageText').dataset.damage = damage
     
     updateBar(name)
+}
+
+function clearDamage(name) {
+    let boss = bosses[name]
+    boss.el.querySelector('.damageText').innerHTML = ''
+    boss.el.querySelector('.damageText').dataset.damage = 0
 }
 
 function updateBar(name) {
@@ -107,4 +127,4 @@ function updateBar(name) {
     }
 }
 
-addHealthBar('rem', 'Remigius of Tenmir', 60)
+// addHealthBar('rem', 'Remigius of Tenmir', 60)
