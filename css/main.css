@@ -158,7 +158,8 @@ h2, h3 {
 }
 
 .portrait {
-    display: absolute;
+    z-index: -2;
+    position: absolute;
     left: 0;
     top: 0;
     height: 100vh;
@@ -203,6 +204,7 @@ h2, h3 {
 }
 
 .blackGradient {
+    z-index: -1;
     top: 0;
     bottom: -100vh;
     background: linear-gradient(#0000 0%, #0000 10%, #000 50%, #000 100%);
