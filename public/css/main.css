@@ -4,6 +4,9 @@
     word-spacing: 0.2em;
 }
 
+html {
+    overflow: hidden;
+}
 body {
     background: #103;
     color: white;
@@ -12,6 +15,7 @@ body {
     padding: 0;
     margin: 0;
     overflow: hidden;
+    position: relative;
 }
 
 input {
@@ -214,6 +218,19 @@ h2, h3 {
 }
 .blackGradient.screenDown {
     transform: translateY(0vh);
+}
+
+.blackGradient .headingWrapper {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 50%;
+    text-align: center;
+    display: grid;
+    place-content: center;
+    color: #111;
+    font-size: 1.7rem;
 }
 
 
