@@ -110,7 +110,7 @@ h2, h3 {
     display: grid;
     grid-template-columns: 1fr auto auto;
     grid-gap: 0.5rem;
-    animation: appear 1s 3s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+    animation: appear 1s 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) both;
 }
 
 .healthBar {
@@ -119,10 +119,11 @@ h2, h3 {
     background: linear-gradient(rgb(0, 0, 0, 0.8), rgb(0, 0, 0, 0.6));
     height: 0.6rem;
     border: 3px solid black; 
-    box-shadow: 0 0 50px black;
+    border-radius: 3px;
+    box-shadow: 0 0 15px rgb(25, 25, 25);
 }
 
-.hp, .hpGhost, .hpTicks {
+.hp, .hpGhost {
     position: absolute;
     left: 0;
     top: 0;
@@ -181,9 +182,14 @@ h2, h3 {
     display: block;
     height: 100%;
     opacity: 0;
+    transition: filter 1s;
 }
 #portrait.show {
     animation: appearRight 1s 1s ease-out both;
+}
+
+#portrait.defeat {
+    filter: grayscale(1)
 }
 
 .background {

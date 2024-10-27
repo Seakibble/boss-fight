@@ -67,12 +67,14 @@ function addHealthBar(id, name, hp, img) {
     $portrait.src = 'images/'+img+'.png'
 
     updateBar(id)
+    // SFX.intro.play()
 
     if (Object.keys(bosses).length > 0) {
         $blackGradient.classList.add('screenDown')
     }
 
     $portrait.classList.add('show')
+    SFX.music.play()
 }
 
 function damage(name, amount) {
@@ -90,6 +92,33 @@ function damage(name, amount) {
     boss.el.querySelector('.damageText').dataset.damage = damage
 
     updateBar(name)
+    SFX.damage.play()
+
+    $portrait.src = 'images/remigius-hurt.png'
+    if (boss.hp === 0) {
+        setTimeout(() => {
+            pick(SFX.remDefeat).play()
+        }, 75)
+        SFX.music.stop()
+    } else if (boss.hp < boss.max / 2 || amount > boss.max / 5) {
+        setTimeout(() => {
+            pick(SFX.remPanic).play()
+        }, 75)
+    } else {
+        setTimeout(() => {
+            pick(SFX.remHurt).play()
+        }, 75)
+    }
+    setTimeout(() => {
+        if (boss.hp === 0) {
+            $portrait.src = 'images/remigius-defeated.png'
+            $portrait.classList.add('defeat')
+        } else if (boss.hp > boss.max / 2) {
+            $portrait.src = 'images/remigius.png'
+        } else {
+            $portrait.src = 'images/remigius-bloody.png'
+        }        
+    }, 300)
 }
 
 function giveTempHP(name, amount) {
@@ -97,6 +126,10 @@ function giveTempHP(name, amount) {
     boss.temp = amount
 
     updateBar(name)
+    SFX.temp.play()
+    setTimeout(() => {
+        pick(SFX.remTaunt).play()
+    }, 300)
 }
 
 function heal(name, amount) {
@@ -115,6 +148,25 @@ function heal(name, amount) {
     boss.el.querySelector('.damageText').dataset.damage = damage
     
     updateBar(name)
+    SFX.heal.play()
+    setTimeout(() => {
+        pick(SFX.remTaunt).play()
+    }, 300)
+
+    $portrait.src = 'images/remigius-heal.png'
+    if (boss.hp > 0) {
+        $portrait.classList.remove('defeat')
+        if (!SFX.music.playing()) {
+            SFX.music.play()
+        }
+    }
+    setTimeout(() => {
+        if (boss.hp > boss.max / 2) {
+            $portrait.src = 'images/remigius.png'
+        } else {
+            $portrait.src = 'images/remigius-bloody.png'
+        }
+    }, 5000)
 }
 
 function clearDamage(name) {
@@ -141,4 +193,86 @@ function updateBar(name) {
     }
 }
 
-// addHealthBar('rem', 'Remigius of Tenmir', 60)
+
+SFX = {}
+
+SFX.damage = new Howl({
+    src: ['sfx/sword-strike.mp3'],
+    volume: 0.5,
+    preload: true
+})
+
+SFX.heal = new Howl({
+    src: ['sfx/heal.mp3'],
+    volume: 0.5,
+    preload: true
+})
+
+SFX.intro = new Howl({
+    src: ['sfx/intro.mp3'],
+    volume: 0.2,
+    preload: true
+})
+
+SFX.temp = new Howl({
+    src: ['sfx/temp.mp3'],
+    volume: 0.5,
+    preload: true
+})
+
+SFX.music = new Howl({
+    src: ['sfx/remigius-music.mp3'],
+    volume: 0.2,
+    preload: true,
+    loop: true
+})
+
+SFX.remTaunt = [
+    new Howl({ src: ['sfx/rem-taunt-1.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-taunt-2.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-taunt-3.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-taunt-4.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-taunt-5.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-taunt-6.mp3'], volume: 0.5 }),
+]
+
+SFX.remDefeat = [
+    new Howl({ src: ['sfx/rem-defeat-1.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-defeat-2.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-defeat-3.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-defeat-4.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-defeat-5.mp3'], volume: 0.5 }),
+    new Howl({ src: ['sfx/rem-defeat-6.mp3'], volume: 0.5 }),
+]
+
+SFX.remHurt = [
+    new Howl({
+        src: ['sfx/rem-hurt-1.mp3'], volume: 0.5
+    }),
+
+    new Howl({
+        src: ['sfx/rem-hurt-2.mp3'], volume: 0.5
+    }),
+    new Howl({
+        src: ['sfx/rem-hurt-3.mp3'], volume: 0.5
+    }),
+]
+
+SFX.remPanic = [
+    new Howl({
+        src: ['sfx/rem-panic-1.mp3'], volume: 1
+    }),
+    new Howl({
+        src: ['sfx/rem-panic-2.mp3'], volume: 1
+    }),
+    new Howl({
+        src: ['sfx/rem-panic-3.mp3'], volume: 1
+    }),
+    new Howl({
+        src: ['sfx/rem-panic-4.mp3'], volume: 1
+    }),
+]
+
+function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)]
+}
