@@ -81,8 +81,16 @@ function addHealthBar(id, name, hp, img) {
         $blackGradient.classList.add('screenDown')
     }
 
+    setBackground(id)
+
     $portrait.parentElement.classList.add('show')
     SFX[id].music.play()
+}
+
+function setBackground(id) {
+    document.body.classList.add(id)
+    document.querySelector('.background1').classList.add(id)
+    document.querySelector('.background2').classList.add(id)
 }
 
 function damage(id, amount = 0) {

@@ -16,7 +16,7 @@ const bossTemplates = {
         hp: 200,
         sfx: {
             defeat: 1,
-            taunt: 4,
+            taunt: 5,
             panic: 3,
             hurt: 3,
         }

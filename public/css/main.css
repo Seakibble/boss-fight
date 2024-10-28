@@ -211,18 +211,30 @@ h2, h3 {
     left: -200px;
     right: -200px;
 
-    background: repeating-linear-gradient(90deg, #0000, #1030 50px, #205 50px, #205 100px);
-
     transform: translateX(0);
 }
 
 .background1 {
     animation: animateLeft 10s infinite linear;
+    background: repeating-linear-gradient(90deg, #0000, #1030 50px, #205 50px, #205 100px);
 }
 
 .background2 {
     background: repeating-linear-gradient(160deg, #1030, #1030 50px, #205 50px, #205 100px);
     animation: animateRight 10s infinite linear;
+}
+
+.lil {
+    background: rgb(162, 114, 23);
+}
+.lil.background1 {
+    animation: scaleStuff 20s infinite alternate ease-in-out ;
+    background: repeating-linear-gradient(50deg, #0000, #3030 40px, rgb(48, 30, 2) 42px, rgb(48, 30, 2) 80px, #0000 82px);
+}
+
+.lil.background2 {
+    background: repeating-linear-gradient(100deg, #3030, #3030 100px, rgb(48, 30, 2) 102px, rgb(48, 30, 2) 198px, #3030 200px);
+    animation: rotateRight 60s infinite alternate ease-in-out;
 }
 
 .blackGradient {
@@ -246,10 +258,23 @@ h2, h3 {
     text-align: center;
     display: grid;
     place-content: center;
-    color: #111;
+    color: #000;
     font-size: 1.7rem;
 }
 
+@keyframes rotateRight {
+    from {
+        transform: rotate(0.02turn);
+    }
+    to {
+        transform: rotate(-0.02turn);
+    }
+}
+@keyframes scaleStuff {
+    from {
+        transform: translateX(100px) scale(1.1);
+    }
+}
 
 @keyframes animateLeft {
     from {
