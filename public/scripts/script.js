@@ -30,6 +30,9 @@ function command(cmd) {
         case 'clear':
             clearDamage(data[1])
             break
+        case 'taunt':
+            taunt(data[1])
+            break
     }
 }
 
@@ -64,21 +67,23 @@ function addHealthBar(id, name, hp, img) {
         el: $boss
     }
 
-    $portrait.src = 'images/'+img+'.png'
+    $portrait.src = 'data/' + id +'/images/' + id + '.png'
 
     updateBar(id)
     // SFX.intro.play()
+
+    loadSFX(id)
 
     if (Object.keys(bosses).length > 0) {
         $blackGradient.classList.add('screenDown')
     }
 
-    $portrait.classList.add('show')
+    $portrait.parentElement.classList.add('show')
     SFX.music.play()
 }
 
-function damage(name, amount) {
-    let boss = bosses[name]
+function damage(id, amount = 0) {
+    let boss = bosses[id]
     boss.temp -= amount
     if (boss.temp < 0) {
         boss.hp += boss.temp
@@ -91,69 +96,92 @@ function damage(name, amount) {
     boss.el.querySelector('.damageText').innerHTML = damage
     boss.el.querySelector('.damageText').dataset.damage = damage
 
-    updateBar(name)
+    updateBar(id)
     SFX.damage.play()
 
-    $portrait.src = 'images/remigius-hurt.png'
+    $portrait.src = 'data/' + id + '/images/' + id +'-hurt.png'
     if (boss.hp === 0) {
         setTimeout(() => {
-            pick(SFX.remDefeat).play()
+            pick(SFX[id].defeat).play()
         }, 75)
         SFX.music.stop()
     } else if (boss.hp < boss.max / 2 || amount > boss.max / 5) {
         setTimeout(() => {
-            pick(SFX.remPanic).play()
+            pick(SFX[id].panic).play()
         }, 75)
     } else {
         setTimeout(() => {
-            pick(SFX.remHurt).play()
+            pick(SFX[id].hurt).play()
         }, 75)
     }
     setTimeout(() => {
         if (boss.hp === 0) {
-            $portrait.src = 'images/remigius-defeated.png'
-            $portrait.classList.add('defeat')
+            $portrait.src = 'data/' + id + '/images/' + id +'-defeated.png'
+            $portrait.parentElement.classList.add('defeat')
         } else if (boss.hp > boss.max / 2) {
-            $portrait.src = 'images/remigius.png'
+            $portrait.src = 'data/' + id +'/images/' + id +'.png'
         } else {
-            $portrait.src = 'images/remigius-bloody.png'
+            $portrait.src = 'data/' + id + '/images/' + id +'-bloody.png'
         }        
     }, 300)
 }
 
-function giveTempHP(name, amount) {
-    let boss = bosses[name]
+function taunt(id) {
+    let boss = bosses[id]
+    let taunt = pick(SFX[id].taunt)
+    taunt.play()
+    console.log(taunt.duration())
+
+    $portrait.src = 'data/' + id + '/images/' + id + '-taunt.png'
+
+    setTimeout(() => {
+        if (boss.hp === 0) {
+            $portrait.src = 'data/' + id + '/images/' + id + '-defeated.png'
+            $portrait.parentElement.classList.add('defeat')
+        } else if (boss.hp > boss.max / 2) {
+            $portrait.src = 'data/' + id + '/images/' + id + '.png'
+        } else {
+            $portrait.src = 'data/' + id + '/images/' + id + '-bloody.png'
+        }
+    }, taunt.duration()*1000)
+}
+
+function giveTempHP(id, amount) {
+    let boss = bosses[id]
     boss.temp = amount
 
-    updateBar(name)
+    updateBar(id)
     SFX.temp.play()
     setTimeout(() => {
-        pick(SFX.remTaunt).play()
+        pick(SFX[id].taunt).play()
     }, 300)
 }
 
-function heal(name, amount) {
-    let boss = bosses[name]
+function heal(id, amount) {
+    let boss = bosses[id]
     boss.hp += amount
-    if (boss.hp > boss.max) boss.hp = boss.max
+    if (boss.hp >= boss.max) {
+        boss.hp = boss.max
+        clearDamage(id)
+    } else {
+        let damage = boss.el.querySelector('.damageText').dataset.damage
+        damage = parseInt(damage) - parseInt(amount)
+        boss.el.querySelector('.damageText').innerHTML = damage
+        boss.el.querySelector('.damageText').dataset.damage = damage        
+    }
     
     boss.el.classList.add('healing')
     setTimeout(()=> {
         boss.el.classList.remove('healing')
     }, 5000)
-
-    let damage = boss.el.querySelector('.damageText').dataset.damage
-    damage = parseInt(damage) - parseInt(amount)
-    boss.el.querySelector('.damageText').innerHTML = damage
-    boss.el.querySelector('.damageText').dataset.damage = damage
     
-    updateBar(name)
+    updateBar(id)
     SFX.heal.play()
     setTimeout(() => {
-        pick(SFX.remTaunt).play()
+        pick(SFX[id].taunt).play()
     }, 300)
 
-    $portrait.src = 'images/remigius-heal.png'
+    $portrait.src = 'data/' + id + '/images/' + id +'-heal.png'
     if (boss.hp > 0) {
         $portrait.classList.remove('defeat')
         if (!SFX.music.playing()) {
@@ -162,21 +190,21 @@ function heal(name, amount) {
     }
     setTimeout(() => {
         if (boss.hp > boss.max / 2) {
-            $portrait.src = 'images/remigius.png'
+            $portrait.src = 'data/' + id + '/images/' + id + '.png'
         } else {
-            $portrait.src = 'images/remigius-bloody.png'
+            $portrait.src = 'data/' + id + '/images/' + id + '-bloody.png'
         }
     }, 5000)
 }
 
-function clearDamage(name) {
-    let boss = bosses[name]
+function clearDamage(id) {
+    let boss = bosses[id]
     boss.el.querySelector('.damageText').innerHTML = ''
     boss.el.querySelector('.damageText').dataset.damage = 0
 }
 
-function updateBar(name) {
-    let boss = bosses[name]
+function updateBar(id) {
+    let boss = bosses[id]
     let health = (boss.hp/boss.max*100) + '%'
     boss.el.querySelector('.hp').style.width = health
     boss.el.querySelector('.hpGhost').style.width = health
@@ -195,83 +223,71 @@ function updateBar(name) {
 
 
 SFX = {}
-
 SFX.damage = new Howl({
-    src: ['sfx/sword-strike.mp3'],
+    src: ['data/general/sfx/sword-strike.mp3'],
     volume: 0.5,
     preload: true
 })
 
 SFX.heal = new Howl({
-    src: ['sfx/heal.mp3'],
+    src: ['data/general/sfx/heal.mp3'],
     volume: 0.5,
     preload: true
 })
 
 SFX.intro = new Howl({
-    src: ['sfx/intro.mp3'],
+    src: ['data/general/sfx/intro.mp3'],
     volume: 0.2,
     preload: true
 })
 
 SFX.temp = new Howl({
-    src: ['sfx/temp.mp3'],
+    src: ['data/general/sfx/temp.mp3'],
     volume: 0.5,
     preload: true
 })
 
+
+function loadSFX(id) {
+    SFX[id] = {}
+    SFX[id].taunt = []
+    for (let i = 1; i <= bossTemplates.rem.sfx.taunt; i++) {
+        SFX[id].taunt.push(new Howl({
+            src: ['data/' + id +'/sfx/' + id +'-taunt-' + i + '.mp3'], volume: 1
+        }))
+    }
+
+    SFX[id].defeat = []
+    for (let i = 1; i <= bossTemplates.rem.sfx.defeat; i++) {
+        SFX[id].defeat.push(new Howl({
+            src: ['data/' + id +'/sfx/' + id +'-defeat-' + i + '.mp3'], volume: 1
+        }))
+    }
+
+    SFX[id].hurt = []
+    for (let i = 1; i <= bossTemplates.rem.sfx.hurt; i++) {
+        SFX[id].hurt.push(new Howl({
+            src: ['data/' + id +'/sfx/' + id +'-hurt-' + i + '.mp3'], volume: 0.75
+        }))
+    }
+
+    SFX[id].panic = []
+    for (let i = 1; i <= bossTemplates.rem.sfx.panic; i++) {
+        SFX[id].panic.push(new Howl({
+            src: ['data/' + id +'/sfx/'+id+'-panic-' + i + '.mp3'], volume: 1
+        }))
+    }
+}
+
 SFX.music = new Howl({
-    src: ['sfx/remigius-music.mp3'],
+    src: ['data/rem/sfx/rem-music.mp3'],
     volume: 0.2,
     preload: true,
     loop: true
 })
 
-SFX.remTaunt = [
-    new Howl({ src: ['sfx/rem-taunt-1.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-taunt-2.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-taunt-3.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-taunt-4.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-taunt-5.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-taunt-6.mp3'], volume: 0.5 }),
-]
 
-SFX.remDefeat = [
-    new Howl({ src: ['sfx/rem-defeat-1.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-defeat-2.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-defeat-3.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-defeat-4.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-defeat-5.mp3'], volume: 0.5 }),
-    new Howl({ src: ['sfx/rem-defeat-6.mp3'], volume: 0.5 }),
-]
 
-SFX.remHurt = [
-    new Howl({
-        src: ['sfx/rem-hurt-1.mp3'], volume: 0.5
-    }),
-
-    new Howl({
-        src: ['sfx/rem-hurt-2.mp3'], volume: 0.5
-    }),
-    new Howl({
-        src: ['sfx/rem-hurt-3.mp3'], volume: 0.5
-    }),
-]
-
-SFX.remPanic = [
-    new Howl({
-        src: ['sfx/rem-panic-1.mp3'], volume: 1
-    }),
-    new Howl({
-        src: ['sfx/rem-panic-2.mp3'], volume: 1
-    }),
-    new Howl({
-        src: ['sfx/rem-panic-3.mp3'], volume: 1
-    }),
-    new Howl({
-        src: ['sfx/rem-panic-4.mp3'], volume: 1
-    }),
-]
 
 function pick(arr) {
     return arr[Math.floor(Math.random() * arr.length)]

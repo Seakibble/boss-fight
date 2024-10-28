@@ -173,6 +173,11 @@ h2, h3 {
     padding: 5vh 0 0;
     display: flex;
     justify-content: center;
+
+    animation: float 3s infinite alternate ease-in-out;
+}
+@keyframes float {
+    from { transform: translateY(30px) }
 }
 .portrait .hurt {
     filter: brightness(2);
@@ -184,11 +189,11 @@ h2, h3 {
     opacity: 0;
     transition: filter 1s;
 }
-#portrait.show {
+.show #portrait {
     animation: appearRight 1s 1s ease-out both;
 }
 
-#portrait.defeat {
+.defeat #portrait {
     filter: grayscale(1)
 }
 
