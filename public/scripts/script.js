@@ -35,9 +35,18 @@ function command(cmd) {
             taunt(data[1])
             break
         case 'victory':
+        case 'vic':
             showMessage('defeated')
             break
+        case 'reload':
+        case 'rel':
+            reload()
+            break
     }
+}
+
+function reload() {
+    location.reload()
 }
 
 let bosses = {}
@@ -73,7 +82,6 @@ function addHealthBar(id, name, hp, img) {
     $portrait.src = 'data/' + id +'/images/' + id + '.png'
 
     updateBar(id)
-    // SFX.intro.play()
 
     loadSFX(id)
 
@@ -85,6 +93,11 @@ function addHealthBar(id, name, hp, img) {
 
     $portrait.parentElement.classList.add('show')
     SFX[id].music.play()
+
+    setTimeout(() => {
+        SFX[id].intro.play()
+    }, 2000)
+    
 }
 
 function setBackground(id) {
@@ -161,7 +174,9 @@ function taunt(id) {
 
 function giveTempHP(id, amount) {
     let boss = bosses[id]
-    boss.temp = amount
+    if (boss.temp < amount) {
+        boss.temp = amount
+    }
 
     updateBar(id)
     SFX.temp.play()
@@ -195,7 +210,7 @@ function heal(id, amount) {
     }, 300)
 
     $portrait.src = 'data/' + id + '/images/' + id +'-heal.png'
-    if (boss.hp > 0) {
+    if (boss.hp > 0 && $portrait.parentElement.classList.contains('defeat')) {
         $portrait.parentElement.classList.remove('defeat')
         SFX[id].music.stop()
         SFX[id].music.volume(0.25)
@@ -311,6 +326,12 @@ function loadSFX(id) {
         volume: 0.25,
         preload: true,
         loop: true
+    })
+
+    SFX[id].intro = new Howl({
+        src: ['data/' + id + '/sfx/' + id + '-intro.mp3'],
+        volume: 1,
+        preload: true,
     })
 }
 

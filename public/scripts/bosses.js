@@ -5,9 +5,9 @@ const bossTemplates = {
         hp: 60,
         sfx: {
             defeat: 6,
-            taunt: 6,
+            taunt: 8,
             panic: 4,
-            hurt: 3,
+            hurt: 6,
         }
     },
     lil: {
