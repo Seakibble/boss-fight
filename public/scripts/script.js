@@ -2,12 +2,13 @@ let $healthBars = document.getElementById('healthBars')
 let $input = document.getElementById('input')
 let $blackGradient = document.querySelector('.blackGradient')
 let $portrait = document.getElementById('portrait')
+let $messages = document.getElementById('messages')
 
 $input.addEventListener('keyup', e => {
     if (e.key === 'Enter') {
         // command($input.value)
         socket.emit('command', $input.value)
-        document.activeElement.blur()
+        // document.activeElement.blur()
     }
 })
 
@@ -33,11 +34,13 @@ function command(cmd) {
         case 'taunt':
             taunt(data[1])
             break
+        case 'victory':
+            showMessage('defeated')
+            break
     }
 }
 
 let bosses = {}
-
 function addHealthBar(id, name, hp, img) {
 
     if (bossTemplates[id]) {
@@ -79,7 +82,7 @@ function addHealthBar(id, name, hp, img) {
     }
 
     $portrait.parentElement.classList.add('show')
-    SFX.music.play()
+    SFX[id].music.play()
 }
 
 function damage(id, amount = 0) {
@@ -104,7 +107,7 @@ function damage(id, amount = 0) {
         setTimeout(() => {
             pick(SFX[id].defeat).play()
         }, 75)
-        SFX.music.stop()
+        SFX[id].music.fade(0.25, 0, 4000)
     } else if (boss.hp < boss.max / 2 || amount > boss.max / 5) {
         setTimeout(() => {
             pick(SFX[id].panic).play()
@@ -118,6 +121,8 @@ function damage(id, amount = 0) {
         if (boss.hp === 0) {
             $portrait.src = 'data/' + id + '/images/' + id +'-defeated.png'
             $portrait.parentElement.classList.add('defeat')
+
+            clearDamage(id)
         } else if (boss.hp > boss.max / 2) {
             $portrait.src = 'data/' + id +'/images/' + id +'.png'
         } else {
@@ -183,10 +188,10 @@ function heal(id, amount) {
 
     $portrait.src = 'data/' + id + '/images/' + id +'-heal.png'
     if (boss.hp > 0) {
-        $portrait.classList.remove('defeat')
-        if (!SFX.music.playing()) {
-            SFX.music.play()
-        }
+        $portrait.parentElement.classList.remove('defeat')
+        SFX[id].music.stop()
+        SFX[id].music.volume(0.25)
+        SFX[id].music.play()
     }
     setTimeout(() => {
         if (boss.hp > boss.max / 2) {
@@ -221,6 +226,15 @@ function updateBar(id) {
     }
 }
 
+function showMessage(msg) {
+    let $msg = $messages.querySelector('.' + msg)
+    $msg.classList.add('show')
+    SFX.victory.play()
+    $msg.addEventListener('animationend', () => {
+        $msg.classList.remove('show')
+    }, true)
+}
+
 
 SFX = {}
 SFX.damage = new Howl({
@@ -247,44 +261,52 @@ SFX.temp = new Howl({
     preload: true
 })
 
+SFX.victory = new Howl({
+    src: ['data/general/sfx/victory.mp3'],
+    volume: 0.5,
+    preload: true
+})
+
 
 function loadSFX(id) {
     SFX[id] = {}
     SFX[id].taunt = []
-    for (let i = 1; i <= bossTemplates.rem.sfx.taunt; i++) {
+    for (let i = 1; i <= bossTemplates[id].sfx.taunt; i++) {
         SFX[id].taunt.push(new Howl({
             src: ['data/' + id +'/sfx/' + id +'-taunt-' + i + '.mp3'], volume: 1
         }))
     }
 
     SFX[id].defeat = []
-    for (let i = 1; i <= bossTemplates.rem.sfx.defeat; i++) {
+    for (let i = 1; i <= bossTemplates[id].sfx.defeat; i++) {
         SFX[id].defeat.push(new Howl({
             src: ['data/' + id +'/sfx/' + id +'-defeat-' + i + '.mp3'], volume: 1
         }))
     }
 
     SFX[id].hurt = []
-    for (let i = 1; i <= bossTemplates.rem.sfx.hurt; i++) {
+    for (let i = 1; i <= bossTemplates[id].sfx.hurt; i++) {
         SFX[id].hurt.push(new Howl({
             src: ['data/' + id +'/sfx/' + id +'-hurt-' + i + '.mp3'], volume: 0.75
         }))
     }
 
     SFX[id].panic = []
-    for (let i = 1; i <= bossTemplates.rem.sfx.panic; i++) {
+    for (let i = 1; i <= bossTemplates[id].sfx.panic; i++) {
         SFX[id].panic.push(new Howl({
             src: ['data/' + id +'/sfx/'+id+'-panic-' + i + '.mp3'], volume: 1
         }))
     }
+
+    SFX[id].music = new Howl({
+        src: ['data/' + id +'/sfx/'+id+'-music.mp3'],
+        volume: 0.25,
+        preload: true,
+        loop: true
+    })
 }
 
-SFX.music = new Howl({
-    src: ['data/rem/sfx/rem-music.mp3'],
-    volume: 0.2,
-    preload: true,
-    loop: true
-})
+
 
 
 
