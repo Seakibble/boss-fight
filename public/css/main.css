@@ -30,13 +30,19 @@ input {
     background-color: rgba(0, 0, 0, 0.333);
     color: limegreen;
     font-family: monospace;
-    transition: top 0.25s;
+    transition: top 0.25s, color 0.25s, background 0.25s;
     outline: none;
     border: none;
 }
 input::selection {
     background: rgb(0, 40, 0);
     color: limegreen;
+}
+input.error {
+    color: crimson;
+}
+input.error::selection {
+    background: rgb(40,0,0)
 }
 input:focus {
     top: 0;
@@ -100,10 +106,15 @@ h2, h3 {
     right: 0;
     box-sizing: border-box;
     padding: 5vh 5vw;
+
+    transition: opacity 1s;
     
     display: flex;
     flex-direction: column-reverse;
     
+}
+#healthBars.hide {
+    opacity: 0;
 }
 
 .bossHealthBar {
@@ -174,7 +185,7 @@ h2, h3 {
     display: flex;
     justify-content: center;
 
-    transition: opacity 10s 4s ease-in-out, top 10s 4s ease-in;
+    transition: opacity 6s ease-in-out, top 10s 4s ease-in;
 
     animation: float 3s infinite alternate ease-in-out;
 }
@@ -198,6 +209,7 @@ h2, h3 {
     animation-play-state: paused;
     opacity: 0;
     top: 100px;
+    transition: opacity 10s 4s ease-in-out, top 10s 4s ease-in;
 }
 .defeat #portrait {
     filter: grayscale(0.75) brightness(0.75);
@@ -224,15 +236,15 @@ h2, h3 {
     animation: animateRight 10s infinite linear;
 }
 
-.lil {
+.bg-lil {
     background: rgb(162, 114, 23);
 }
-.lil.background1 {
+.bg-lil .background1 {
     animation: scaleStuff 20s infinite alternate ease-in-out ;
     background: repeating-linear-gradient(50deg, #0000, #3030 40px, rgb(48, 30, 2) 42px, rgb(48, 30, 2) 80px, #0000 82px);
 }
 
-.lil.background2 {
+.bg-lil .background2 {
     background: repeating-linear-gradient(100deg, #3030, #3030 100px, rgb(48, 30, 2) 102px, rgb(48, 30, 2) 198px, #3030 200px);
     animation: rotateRight 60s infinite alternate ease-in-out;
 }

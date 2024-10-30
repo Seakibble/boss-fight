@@ -1,3 +1,12 @@
+const STATE = Object.freeze({
+    NORMAL: 'normal',
+    BLOODY: 'bloody',
+    HURT: 'hurt',
+    HEAL: 'heal',
+    DEAD: 'defeated',
+    TAUNT: 'taunt'
+})
+
 const bossTemplates = {
     rem: {
         name: 'Remigius of Tenmir',

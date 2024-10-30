@@ -4,16 +4,24 @@ let $blackGradient = document.querySelector('.blackGradient')
 let $portrait = document.getElementById('portrait')
 let $messages = document.getElementById('messages')
 
+// On pressing enter in the terminal, broadcast command to server.
 $input.addEventListener('keyup', e => {
     if (e.key === 'Enter') {
-        // command($input.value)
         socket.emit('command', $input.value)
-        // document.activeElement.blur()
+    } else {
+        $input.classList.remove('error')
     }
 })
 
 function command(cmd) {
     let data = cmd.split(' ')
+
+    // Check that there's an id for commands that require an id
+    if (!['victory','vic','reload','rel', 'add'].includes(data[0]) && bosses[data[1]] === undefined
+        || data[0] == 'add' && bossTemplates[data[1]] === undefined) {
+        $input.classList.add('error')
+        return
+    }
 
     switch (data[0]) {
         case 'dam':
@@ -42,6 +50,15 @@ function command(cmd) {
         case 'rel':
             reload()
             break
+        case 'del':
+        case 'delete':
+            removeHealthBar(data[1])
+            break
+        case 'sethp':
+        case 'hp':
+            setHP(data[1], data[2])
+        default:
+            $input.classList.add('error')
     }
 }
 
@@ -50,15 +67,14 @@ function reload() {
 }
 
 let bosses = {}
-function addHealthBar(id, name, hp, img) {
-
+function addHealthBar(id, name, hp) {
     if (bossTemplates[id]) {
         name = bossTemplates[id].name
         hp = bossTemplates[id].hp
-        img = bossTemplates[id].img
+    } else {
+        name = name.replaceAll('_',' ')
     }
 
-    name = name.replaceAll('_',' ')
     let $boss = document.createElement('div')
     $boss.classList.add('bossHealthBar')
     $boss.innerHTML = `
@@ -76,34 +92,94 @@ function addHealthBar(id, name, hp, img) {
         hp: parseInt(hp),
         max: parseInt(hp),
         temp: 0,
-        el: $boss
+        el: $boss,
+        state: STATE.NORMAL
     }
 
-    $portrait.src = 'data/' + id +'/images/' + id + '.png'
-
+    setPortrait(id)
     updateBar(id)
-
     loadSFX(id)
+    setBackground(id)
 
     if (Object.keys(bosses).length > 0) {
+        $healthBars.classList.remove('hide')
         $blackGradient.classList.add('screenDown')
     }
 
-    setBackground(id)
-
-    $portrait.parentElement.classList.add('show')
     SFX[id].music.play()
 
+    // Play intro line on appearing.
     setTimeout(() => {
         SFX[id].intro.play()
     }, 2000)
-    
 }
 
+function removeHealthBar(id) {
+    let boss = bosses[id]
+    if (boss) {
+        if (Object.keys(bosses).length === 1) {
+            $healthBars.classList.add('hide')
+            $blackGradient.classList.remove('screenDown')
+        }
+        setTimeout(()=>{
+            setPortrait(id, null)
+            unsetBackground(id)
+            boss.el.remove()
+            delete bosses[id]
+        }, 2000)
+    }
+}
+
+function setPortrait(id, state = undefined, duration = 0) {
+    let boss = bosses[id]
+    if (boss.hp === 0) {
+        boss.state = STATE.DEAD
+    } else if (boss.hp > boss.max / 2) {
+        boss.state = STATE.NORMAL
+    } else {
+        boss.state = STATE.BLOODY
+    }
+
+    if (state === undefined) {
+        state = boss.state
+    }
+
+    if (boss.hp <= 0) {
+        $portrait.parentElement.classList.add('defeat')
+    } else {
+        $portrait.parentElement.classList.remove('defeat')
+    }
+
+    if (state === null) {
+        $portrait.src = ''
+        $portrait.parentElement.classList.remove('show')
+
+    } else {
+        $portrait.src = `data/${id}/images/${id}-${state}.png`
+        $portrait.parentElement.classList.add('show')
+    }
+
+    // Resets to current state after duration
+    if (duration > 0) {
+        setTimeout(()=> {
+            setPortrait(id)
+        }, duration)
+    }
+}
+
+
 function setBackground(id) {
-    document.body.classList.add(id)
-    document.querySelector('.background1').classList.add(id)
-    document.querySelector('.background2').classList.add(id)
+    document.body.classList.add('bg-'+id)
+}
+function unsetBackground(id) {
+    document.body.classList.remove('bg-'+id)
+}
+
+function setHP(id, hp) {
+    let boss = bosses[id]
+    boss.hp = hp
+    updateBar(id)
+    setPortrait(id)
 }
 
 function damage(id, amount = 0) {
@@ -123,7 +199,8 @@ function damage(id, amount = 0) {
     updateBar(id)
     SFX.damage.play()
 
-    $portrait.src = 'data/' + id + '/images/' + id +'-hurt.png'
+    setPortrait(id, STATE.HURT, 300)
+
     if (boss.hp === 0) {
         setTimeout(() => {
             pick(SFX[id].defeat).play()
@@ -138,18 +215,6 @@ function damage(id, amount = 0) {
             pick(SFX[id].hurt).play()
         }, 75)
     }
-    setTimeout(() => {
-        if (boss.hp === 0) {
-            $portrait.src = 'data/' + id + '/images/' + id +'-defeated.png'
-            $portrait.parentElement.classList.add('defeat')
-
-            clearDamage(id)
-        } else if (boss.hp > boss.max / 2) {
-            $portrait.src = 'data/' + id +'/images/' + id +'.png'
-        } else {
-            $portrait.src = 'data/' + id + '/images/' + id +'-bloody.png'
-        }        
-    }, 300)
 }
 
 function taunt(id) {
@@ -158,18 +223,8 @@ function taunt(id) {
     taunt.play()
     console.log(taunt.duration())
 
-    $portrait.src = 'data/' + id + '/images/' + id + '-taunt.png'
+    setPortrait(id, STATE.TAUNT, taunt.duration()*1000)
 
-    setTimeout(() => {
-        if (boss.hp === 0) {
-            $portrait.src = 'data/' + id + '/images/' + id + '-defeated.png'
-            $portrait.parentElement.classList.add('defeat')
-        } else if (boss.hp > boss.max / 2) {
-            $portrait.src = 'data/' + id + '/images/' + id + '.png'
-        } else {
-            $portrait.src = 'data/' + id + '/images/' + id + '-bloody.png'
-        }
-    }, taunt.duration()*1000)
 }
 
 function giveTempHP(id, amount) {
@@ -209,20 +264,14 @@ function heal(id, amount) {
         pick(SFX[id].taunt).play()
     }, 300)
 
-    $portrait.src = 'data/' + id + '/images/' + id +'-heal.png'
+    setPortrait(id, STATE.HEAL, 5000)
+
     if (boss.hp > 0 && $portrait.parentElement.classList.contains('defeat')) {
         $portrait.parentElement.classList.remove('defeat')
         SFX[id].music.stop()
         SFX[id].music.volume(0.25)
         SFX[id].music.play()
     }
-    setTimeout(() => {
-        if (boss.hp > boss.max / 2) {
-            $portrait.src = 'data/' + id + '/images/' + id + '.png'
-        } else {
-            $portrait.src = 'data/' + id + '/images/' + id + '-bloody.png'
-        }
-    }, 5000)
 }
 
 function clearDamage(id) {
