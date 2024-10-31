@@ -14,6 +14,10 @@ $input.addEventListener('keyup', e => {
     }
 })
 
+document.body.addEventListener('click', e => {
+    $input.focus()
+})
+
 function command(cmd) {
     let data = cmd.split(' ')
 
