@@ -307,6 +307,14 @@ function giveTempHP(id, amount) {
 function heal(id, amount) {
     let boss = bosses[id]
     boss.hp += amount
+
+    if (boss.hp > 0 && $portrait.parentElement.classList.contains('defeat')) {
+        $portrait.parentElement.classList.remove('defeat')
+        SFX[id].music.stop()
+        SFX[id].music.volume(0.25)
+        SFX[id].music.play()
+    }
+
     if (boss.hp >= boss.max) {
         boss.hp = boss.max
         clearDamage(id)
@@ -329,13 +337,6 @@ function heal(id, amount) {
     }, 300)
 
     setPortrait(id, STATE.HEAL, 5000)
-
-    if (boss.hp > 0 && $portrait.parentElement.classList.contains('defeat')) {
-        $portrait.parentElement.classList.remove('defeat')
-        SFX[id].music.stop()
-        SFX[id].music.volume(0.25)
-        SFX[id].music.play()
-    }
 }
 
 function clearDamage(id) {
