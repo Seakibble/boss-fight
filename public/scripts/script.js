@@ -240,6 +240,8 @@ function setHP(id, hp) {
     setPortrait(id)
 }
 
+let recentHurts = []
+let recentPanics = []
 function damage(id, amount = 0) {
     let boss = bosses[id]
     boss.temp -= amount
@@ -266,11 +268,29 @@ function damage(id, amount = 0) {
         SFX[id].music.fade(0.25, 0, 4000)
     } else if (boss.hp < boss.max / 2 || amount > boss.max / 5) {
         setTimeout(() => {
-            pick(SFX[id].panic).play()
+            let panic = null
+            do {
+                panic = pick(SFX[id].panic, true)
+            } while (recentPanics.includes(panic.num))
+            recentPanics.push(panic.num)
+            panic = panic.val
+            panic.play()
+            if (recentPanics.length > Math.floor(SFX[id].panic.length / 2)) {
+                recentPanics.shift()
+            }
         }, 75)
     } else {
         setTimeout(() => {
-            pick(SFX[id].hurt).play()
+            let hurt = null
+            do {
+                hurt = pick(SFX[id].hurt, true)
+            } while (recentHurts.includes(hurt.num))
+            recentHurts.push(hurt.num)
+            hurt = hurt.val
+            hurt.play()
+            if (recentHurts.length > Math.floor(SFX[id].hurt.length / 2)) {
+                recentHurts.shift()
+            }
         }, 75)
     }
 }
@@ -290,7 +310,6 @@ function taunt(id, num = undefined) {
         do {
             taunt = pick(SFX[id].taunt, true)
         } while (recentTaunts.includes(taunt.num))
-        
         recentTaunts.push(taunt.num)
         taunt = taunt.val
     }
