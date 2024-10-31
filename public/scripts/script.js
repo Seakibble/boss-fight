@@ -18,8 +18,11 @@ function command(cmd) {
     let data = cmd.split(' ')
 
     // Check that there's an id for commands that require an id
-    if (!['victory','vic','reload','rel', 'add'].includes(data[0]) && bosses[data[1]] === undefined
+    if (!['victory','vic','reload','rel', 'add', 'vol', 'mute', 'unmute'].includes(data[0]) && bosses[data[1]] === undefined
         || data[0] == 'add' && bossTemplates[data[1]] === undefined) {
+        $input.classList.add('error')
+        return
+    } else if (data[0] == 'vol' && (isNaN(data[1]) || data[1] < 0 || data[1] > 1)) {
         $input.classList.add('error')
         return
     }
@@ -59,9 +62,23 @@ function command(cmd) {
         case 'hp':
             setHP(data[1], data[2])
             break
+        case 'vol':
+            setVolume(data[1])
+            break
+        case 'mute':
+            setVolume(0)
+            break
+        case 'unmute':
+            setVolume(1)
+            break
         default:
             $input.classList.add('error')
     }
+}
+
+let volume = 1
+function setVolume(x) {
+    Howler.volume(x)
 }
 
 function reload() {
@@ -320,31 +337,31 @@ function showMessage(msg) {
 SFX = {}
 SFX.damage = new Howl({
     src: ['data/general/sfx/sword-strike.mp3'],
-    volume: 0.5,
+    volume: 0.5 * volume,
     preload: true
 })
 
 SFX.heal = new Howl({
     src: ['data/general/sfx/heal.mp3'],
-    volume: 0.5,
+    volume: 0.5 * volume,
     preload: true
 })
 
 SFX.intro = new Howl({
     src: ['data/general/sfx/intro.mp3'],
-    volume: 0.2,
+    volume: 0.2 * volume,
     preload: true
 })
 
 SFX.temp = new Howl({
     src: ['data/general/sfx/temp.mp3'],
-    volume: 0.5,
+    volume: 0.5 * volume,
     preload: true
 })
 
 SFX.victory = new Howl({
     src: ['data/general/sfx/victory.mp3'],
-    volume: 0.5,
+    volume: 0.5 * volume,
     preload: true
 })
 
@@ -354,41 +371,41 @@ function loadSFX(id) {
     SFX[id].taunt = []
     for (let i = 1; i <= bossTemplates[id].sfx.taunt; i++) {
         SFX[id].taunt.push(new Howl({
-            src: ['data/' + id +'/sfx/' + id +'-taunt-' + i + '.mp3'], volume: 1
+            src: ['data/' + id + '/sfx/' + id + '-taunt-' + i + '.mp3'], volume: 1 * volume
         }))
     }
 
     SFX[id].defeat = []
     for (let i = 1; i <= bossTemplates[id].sfx.defeat; i++) {
         SFX[id].defeat.push(new Howl({
-            src: ['data/' + id +'/sfx/' + id +'-defeat-' + i + '.mp3'], volume: 1
+            src: ['data/' + id + '/sfx/' + id + '-defeat-' + i + '.mp3'], volume: 1 * volume
         }))
     }
 
     SFX[id].hurt = []
     for (let i = 1; i <= bossTemplates[id].sfx.hurt; i++) {
         SFX[id].hurt.push(new Howl({
-            src: ['data/' + id +'/sfx/' + id +'-hurt-' + i + '.mp3'], volume: 0.75
+            src: ['data/' + id + '/sfx/' + id + '-hurt-' + i + '.mp3'], volume: 0.75 * volume
         }))
     }
 
     SFX[id].panic = []
     for (let i = 1; i <= bossTemplates[id].sfx.panic; i++) {
         SFX[id].panic.push(new Howl({
-            src: ['data/' + id +'/sfx/'+id+'-panic-' + i + '.mp3'], volume: 1
+            src: ['data/' + id + '/sfx/' + id + '-panic-' + i + '.mp3'], volume: 1 * volume
         }))
     }
 
     SFX[id].music = new Howl({
         src: ['data/' + id +'/sfx/'+id+'-music.mp3'],
-        volume: 0.25,
+        volume: 0.25 * volume,
         preload: true,
         loop: true
     })
 
     SFX[id].intro = new Howl({
         src: ['data/' + id + '/sfx/' + id + '-intro.mp3'],
-        volume: 1,
+        volume: 1 * volume,
         preload: true,
     })
 }
