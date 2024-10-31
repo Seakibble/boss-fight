@@ -275,18 +275,32 @@ function damage(id, amount = 0) {
     }
 }
 
+let recentTaunts = []
 function taunt(id, num = undefined) {
     let boss = bosses[id]
 
     let taunt = null
+
     if (num !== undefined) {
         taunt = SFX[id].taunt[num]
+        if (!recentTaunts.includes(num)) {
+            recentTaunts.push(num)
+        }
     } else {
-        taunt = pick(SFX[id].taunt)
+        do {
+            taunt = pick(SFX[id].taunt, true)
+        } while (recentTaunts.includes(taunt.num))
+        
+        recentTaunts.push(taunt.num)
+        taunt = taunt.val
     }
+
+    if (recentTaunts.length > Math.floor(SFX[id].taunt.length / 2)) {
+        recentTaunts.shift()
+    }
+
     if (taunt) {
         taunt.play()
-        console.log(taunt.duration())
         setPortrait(id, STATE.TAUNT, taunt.duration() * 1000)
     }
 }
@@ -454,6 +468,13 @@ function loadSFX(id) {
 
 
 
-function pick(arr) {
+function pick(arr, getNum = false) {
+    if (getNum) {
+        let num = Math.floor(Math.random() * arr.length)
+        return {
+            val: arr[num],
+            num: num
+        }
+    }
     return arr[Math.floor(Math.random() * arr.length)]
 }

@@ -141,20 +141,20 @@ const bgs = {
 
     2: `<style>
         #bg-2 rect {
-            fill: rgb(30, 0, 20);
+            fill: rgb(30, 0, 5);
             transition: fill 2s;
         }
         rect#vLine {
-            fill: rgb(50,5,10);
+            fill: rgb(60,0,10);
             animation: scaleStuff 30s infinite alternate ease-in-out;
         }
         rect#hLine {
-            fill: rgb(50,5,10);
+            fill: rgb(60,0,10);
             animation: rotateRight 40s infinite alternate ease-in-out;
         }
         
-        .bloody #vLine, .bloody #hLine { fill: rgb(90,30,30)}
-        .bloody #bg-2 .bg { fill:rgb(280,20,80)}
+        .bloody #vLine, .bloody #hLine { fill: rgb(50,10,50)}
+        .bloody #bg-2 .bg { fill:rgb(80,10,80)}
 
         @keyframes rotateRight {
             from { transform: rotate(0.04turn) scale(1); }
