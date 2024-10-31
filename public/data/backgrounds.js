@@ -1,5 +1,5 @@
-const bgs = [
-    `<style>
+const bgs = {
+    0: `<style>
         #vLine { animation: bgAnimateLeft 10s infinite linear; }
         #hLine { animation: bgAnimateDown 30s infinite linear; }
 
@@ -61,7 +61,7 @@ const bgs = [
     </svg>`,
 
 
-    `<style>
+    1: `<style>
         #bg-1 rect {
             fill: rgb(162, 114, 23);
             transition: fill 2s;
@@ -138,4 +138,4 @@ const bgs = [
             <use xlink:href="#vLine" x="190" />
         </g>
     </svg>`,
-]
+}
