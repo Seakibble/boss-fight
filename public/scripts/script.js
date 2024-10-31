@@ -75,7 +75,7 @@ function command(cmd) {
             clearDamage(data[1])
             break
         case 'taunt':
-            taunt(data[1])
+            taunt(data[1], data[2])
             break
         case 'victory':
         case 'vic':
@@ -275,14 +275,20 @@ function damage(id, amount = 0) {
     }
 }
 
-function taunt(id) {
+function taunt(id, num = undefined) {
     let boss = bosses[id]
-    let taunt = pick(SFX[id].taunt)
-    taunt.play()
-    console.log(taunt.duration())
 
-    setPortrait(id, STATE.TAUNT, taunt.duration()*1000)
-
+    let taunt = null
+    if (num !== undefined) {
+        taunt = SFX[id].taunt[num]
+    } else {
+        taunt = pick(SFX[id].taunt)
+    }
+    if (taunt) {
+        taunt.play()
+        console.log(taunt.duration())
+        setPortrait(id, STATE.TAUNT, taunt.duration() * 1000)
+    }
 }
 
 function giveTempHP(id, amount) {

@@ -31,5 +31,17 @@ const bossTemplates = {
             hurt: 3,
         },
         bg: 1
+    },
+    log: {
+        name: 'Logus the Blind',
+        id: 'log',
+        hp: 300,
+        sfx: {
+            defeat: 1,
+            taunt: 8,
+            panic: 1,
+            hurt: 4,
+        },
+        bg: 2
     }
 }
