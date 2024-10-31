@@ -41,6 +41,9 @@ input::selection {
 input.error {
     color: crimson;
 }
+input.ghost {
+    color: grey;
+}
 input.error::selection {
     background: rgb(40,0,0)
 }

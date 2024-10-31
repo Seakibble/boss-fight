@@ -6,10 +6,34 @@ let $messages = document.getElementById('messages')
 let $background = document.getElementById('bg')
 
 // On pressing enter in the terminal, broadcast command to server.
+let cmds = []
+let cmdsIndex = 0
 $input.addEventListener('keyup', e => {
     if (e.key === 'Enter') {
+        $input.classList.remove('ghost')
         socket.emit('command', $input.value)
+        cmds.unshift($input.value)
+        cmdsIndex = 0
+    } else if (e.key == 'ArrowUp') {
+        cmdsIndex += 1
+        $input.classList.remove('error')
+        $input.classList.add('ghost')
+        if (cmdsIndex >= cmds.length) {
+            cmdsIndex = cmds.length - 1
+        }
+        $input.value = cmds[cmdsIndex]
+        
+    } else if (e.key == 'ArrowDown') {
+        cmdsIndex -= 1
+        $input.classList.remove('error')
+        $input.classList.add('ghost')
+        if (cmdsIndex < 0) {
+            cmdsIndex = 0
+        }
+        $input.value = cmds[cmdsIndex]
+        
     } else {
+        $input.classList.remove('ghost')
         $input.classList.remove('error')
     }
 })
@@ -27,6 +51,9 @@ function command(cmd) {
         $input.classList.add('error')
         return
     } else if (data[0] == 'vol' && (isNaN(data[1]) || data[1] < 0 || data[1] > 1)) {
+        $input.classList.add('error')
+        return
+    } else if ((data[0] == 'dam' || data[0] == 'heal' || data[0] == 'temp') && (isNaN(data[2]) || data[2] < 0)) {
         $input.classList.add('error')
         return
     }
@@ -162,6 +189,7 @@ function setPortrait(id, state = undefined, duration = 0) {
         boss.state = STATE.DEAD
     } else if (boss.hp > boss.max / 2) {
         boss.state = STATE.NORMAL
+        $background.classList.remove('bloody')
     } else {
         boss.state = STATE.BLOODY
         $background.classList.add('bloody')
@@ -207,7 +235,7 @@ function unsetBackground(id) {
 
 function setHP(id, hp) {
     let boss = bosses[id]
-    boss.hp = hp
+    boss.hp = parseInt(hp)
     updateBar(id)
     setPortrait(id)
 }

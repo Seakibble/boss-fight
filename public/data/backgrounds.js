@@ -80,18 +80,18 @@ const bgs = {
         .bloody #bg-1 .bg { fill:rgb(23,114,162)}
 
         @keyframes rotateRight {
-            from { transform: rotate(0.02turn); }
-            to { transform: rotate(-0.02turn); }
+            from { transform: rotate(0.04turn) scale(1); }
+            to { transform: rotate(-0.04turn) scale(1.3); }
         }
-        @keyframes scaleStuff { from { transform: translateX(10px) scale(1.1); }}
+        @keyframes scaleStuff { from { transform: translateX(10px) scale(1.2); }}
     </style>
     <svg id='bg-1' width='100%' height='100%' viewbox="0 0 100 100">
         <defs>
-            <rect id="vLine" class='line' width="5" height="400" y="50" x="50" />
-            <rect id="hLine" class='line' width="400" height="5" x="-100" y="100" />
+            <rect id="vLine" class='line' width="3" height="400" y="50" x="50" />
+            <rect id="hLine" class='line' width="400" height="3" x="-50" y="0" />
         </defs>
         <rect class="bg" width="400" height="400" x="-100" y="-100" />
-        <g id='hLines' transform-origin="200 200" transform="rotate(50)">
+        <g id='hLines' transform-origin="100 100" transform="rotate(60)">
             <use xlink:href="#hLine" y="0 "/>
             <use xlink:href="#hLine" y="10" />
             <use xlink:href="#hLine" y="20" />
