@@ -17,7 +17,8 @@ const bossTemplates = {
             taunt: 8,
             panic: 4,
             hurt: 6,
-        }
+        },
+        bg: 0
     },
     lil: {
         name: 'Empress Liliana Ankane I',
@@ -28,6 +29,7 @@ const bossTemplates = {
             taunt: 5,
             panic: 3,
             hurt: 3,
-        }
+        },
+        bg: 1
     }
 }

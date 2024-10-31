@@ -8,7 +8,7 @@ html {
     overflow: hidden;
 }
 body {
-    background: #103;
+    background: #000;
     color: white;
     height: 100vh;
     width: 100vw;
@@ -215,7 +215,7 @@ h2, h3 {
     filter: grayscale(0.75) brightness(0.75);
 }
 
-.background {
+.background, #bg, #bg svg, .blackGradient {
     position: absolute;
     z-index: -10;
     top: -200px;
@@ -224,29 +224,6 @@ h2, h3 {
     right: -200px;
 
     transform: translateX(0);
-}
-
-.background1 {
-    animation: animateLeft 10s infinite linear;
-    background: repeating-linear-gradient(90deg, #0000, #1030 50px, #205 50px, #205 100px);
-}
-
-.background2 {
-    background: repeating-linear-gradient(160deg, #1030, #1030 50px, #205 50px, #205 100px);
-    animation: animateRight 10s infinite linear;
-}
-
-.bg-lil {
-    background: rgb(162, 114, 23);
-}
-.bg-lil .background1 {
-    animation: scaleStuff 20s infinite alternate ease-in-out ;
-    background: repeating-linear-gradient(50deg, #0000, #3030 40px, rgb(48, 30, 2) 42px, rgb(48, 30, 2) 80px, #0000 82px);
-}
-
-.bg-lil .background2 {
-    background: repeating-linear-gradient(100deg, #3030, #3030 100px, rgb(48, 30, 2) 102px, rgb(48, 30, 2) 198px, #3030 200px);
-    animation: rotateRight 60s infinite alternate ease-in-out;
 }
 
 .blackGradient {
@@ -272,31 +249,6 @@ h2, h3 {
     place-content: center;
     color: #000;
     font-size: 1.7rem;
-}
-
-@keyframes rotateRight {
-    from {
-        transform: rotate(0.02turn);
-    }
-    to {
-        transform: rotate(-0.02turn);
-    }
-}
-@keyframes scaleStuff {
-    from {
-        transform: translateX(100px) scale(1.1);
-    }
-}
-
-@keyframes animateLeft {
-    from {
-        transform: translateX(100px);
-    }
-}
-@keyframes animateUp {
-    from {
-        transform: translateY(100px);
-    }
 }
 
 @keyframes appearRight {

@@ -3,6 +3,7 @@ let $input = document.getElementById('input')
 let $blackGradient = document.querySelector('.blackGradient')
 let $portrait = document.getElementById('portrait')
 let $messages = document.getElementById('messages')
+let $background = document.getElementById('bg')
 
 // On pressing enter in the terminal, broadcast command to server.
 $input.addEventListener('keyup', e => {
@@ -57,6 +58,7 @@ function command(cmd) {
         case 'sethp':
         case 'hp':
             setHP(data[1], data[2])
+            break
         default:
             $input.classList.add('error')
     }
@@ -71,20 +73,22 @@ function addHealthBar(id, name, hp) {
     if (bossTemplates[id]) {
         name = bossTemplates[id].name
         hp = bossTemplates[id].hp
+        bg = bossTemplates[id].bg
     } else {
-        name = name.replaceAll('_',' ')
+        name = name.replaceAll('_', ' ')
+        bg = 0
     }
 
     let $boss = document.createElement('div')
     $boss.classList.add('bossHealthBar')
     $boss.innerHTML = `
-<h2 class="name">${name}</h2>
-<h3 class="damageText" data-damage=0></h3>
-<h3 class="tempText"></h3>
-<div class='healthBar'>
-    <div class="hp"></div>
-    <div class="hpGhost"></div>
-</div>`
+        <h2 class="name">${name}</h2>
+        <h3 class="damageText" data-damage=0></h3>
+        <h3 class="tempText"></h3>
+        <div class='healthBar'>
+            <div class="hp"></div>
+            <div class="hpGhost"></div>
+        </div>`
     
     $healthBars.appendChild($boss)
 
@@ -93,7 +97,8 @@ function addHealthBar(id, name, hp) {
         max: parseInt(hp),
         temp: 0,
         el: $boss,
-        state: STATE.NORMAL
+        state: STATE.NORMAL,
+        bg: bg
     }
 
     setPortrait(id)
@@ -138,6 +143,7 @@ function setPortrait(id, state = undefined, duration = 0) {
         boss.state = STATE.NORMAL
     } else {
         boss.state = STATE.BLOODY
+        $background.classList.add('bloody')
     }
 
     if (state === undefined) {
@@ -169,10 +175,13 @@ function setPortrait(id, state = undefined, duration = 0) {
 
 
 function setBackground(id) {
-    document.body.classList.add('bg-'+id)
+    // document.body.classList.add('bg-'+id)
+    $background.innerHTML = bgs[bosses[id].bg]
 }
 function unsetBackground(id) {
-    document.body.classList.remove('bg-'+id)
+    // document.body.classList.remove('bg-'+id)
+    $background.innerHTML = ''
+    $background.classList.remove('bloody')
 }
 
 function setHP(id, hp) {
