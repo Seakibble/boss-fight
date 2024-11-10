@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,200..900;1,200..900&display=swap"
+        rel="stylesheet">
+
+    <title>Boss Fight</title>
+
+    <link rel="stylesheet" href="css/terminal.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div id="messages" class="messages">
+        <div class="defeated"><div>ENEMY VANQUISHED</div></div>
+    </div>
+    <div class="background background1"></div>
+    <div class="background background2"></div>
+    
+    <div class="background blackGradient ">
+        <div class="headingWrapper">
+            <h1>welcome</h1>
+        </div>
+    </div>
+
+    <div class="portrait">
+        <img id="portrait" src="">
+    </div>
+    <input type="text" id="terminal" value=""  autocomplete="off" >
+    <div id="healthBars" class="hide"></div>
+
+    <script src="scripts/howler.min.js"></script>
+    
+    <script src="scripts/bosses.js"></script>
+    <script src="scripts/script.js"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        socket.on('command', (cmd) => {
+            command(cmd)
+        })
+    </script>
+
+</body>
+</html>

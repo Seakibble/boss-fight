@@ -1,5 +1,5 @@
 let $healthBars = document.getElementById('healthBars')
-let $input = document.getElementById('input')
+let $input = document.getElementById('terminal')
 let $blackGradient = document.querySelector('.blackGradient')
 let $portrait = document.getElementById('portrait')
 let $messages = document.getElementById('messages')

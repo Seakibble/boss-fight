@@ -11,39 +11,23 @@
 
     <title>Boss Fight</title>
 
-    <link rel="stylesheet" href="css/main.css">
+    <style>
+        body {
+            background: #050540;
+            color: #77e;
+        }
+    </style>
 </head>
 <body>
-    <div id="messages" class="messages">
-        <div class="defeated"><div>ENEMY VANQUISHED</div></div>
-    </div>
-    <div class="background background1"></div>
-    <div class="background background2"></div>
+    <h1>INITIATIVE TRACKER</h1>
+    <ul>
+        <li><a href="/boss-fight.html">Boss Fight</a></li>
+        <li><a href="/init.html">Initiative Tracker</a></li>
+    </ul>
     
-    <div class="background blackGradient ">
-        <div class="headingWrapper">
-            <h1>welcome</h1>
-        </div>
-    </div>
-
-    <div class="portrait">
-        <img id="portrait" src="">
-    </div>
-    <input type="text" id="input" value=""  autocomplete="off" >
-    <div id="healthBars" class="hide"></div>
-
-    <script src="scripts/howler.min.js"></script>
-    
-    <script src="scripts/bosses.js"></script>
-    <script src="scripts/script.js"></script>
-
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-
-        socket.on('command', (cmd) => {
-            command(cmd)
-        })
     </script>
 
 </body>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,200..900;1,200..900&display=swap"
+        rel="stylesheet">
+
+    <title>Boss Fight</title>
+
+    <style>
+        html {
+            font-family: "Crimson Pro", Arial, Helvetica, sans-serif;
+            font-size: 20px;
+        }
+        body {
+            background: #050540;
+            color: #77e;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+    <link rel="stylesheet" href="css/initiative.css">
+    <link rel="stylesheet" href="css/terminal.css">
+</head>
+<body>
+    <input type="text" id="terminal" value=""  autocomplete="off" >
+
+    <h1>INITIATIVE TRACKER</h1>
+    <div id="initiative" class="initiative"></div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // On pressing enter in the terminal, broadcast command to server.
+        let $terminal = document.getElementById('terminal')
+        $terminal.addEventListener('keyup', e => {
+            if (e.key === 'Enter') {
+                if ($terminal.value == 'add') {
+                    sendInitiative()
+                    return
+                }
+                socket.emit('commandInit', $terminal.value)
+            } else {
+                $terminal.classList.remove('error')
+            }
+        })
+
+        
+        let $initiative = document.getElementById('initiative')
+        const socket = io()
+        socket.emit('commandInit', 'get')
+
+
+        sendInitiative()
+        function sendInitiative() {
+            let $dialog = document.createElement('div')
+            $dialog.classList.add('addPrompt')
+            $dialog.innerHTML = `<h1>Add Token</h1>
+            <label for='name'>Name:</label><input id='name'>
+            <label for='init'>Initiative:</label><input id='init'>
+            <label for='type'>Type:</label><select id='type'>
+                <option value='player' selected>Player Character</option>
+                <option value='enemy'>Enemy</option>
+                <option value='ally'>Ally</option>
+                </select>
+            <div class='btnWrapper'><button id='submit'>Add Token</button></div>
+            `
+            document.body.append($dialog)
+            document.getElementById('submit').addEventListener('click', ()=>{
+                socket.emit('addInitiative', {
+                    name: document.getElementById('name').value,
+                    init: document.getElementById('init').value,
+                    type: document.getElementById('type').value
+                })
+                $dialog.remove()
+                sendInitiative()
+            })
+        }
+
+        socket.on('setInitiative', (tokens) => {
+            if (tokens == null) {
+                $initiative.innerHTML = 'output'
+                return
+            }
+            let output = ''
+            
+            tokens.forEach((token, index) => {
+                output += `
+                <div class='token ${token.type} init-${index}'>
+                    <div class='number'>${token.init}</div>
+                    <div class='name'>${token.name}</div>
+                    <div class='options'>
+                        <button class='btn-delete' data-index='${index}'>Delete Token</button>
+                    </div>
+                </div>`
+            })
+            $initiative.innerHTML = output
+        })
+
+
+        socket.on('setActive', (index) => {
+            if ($initiative.children.length == 0) {
+                return
+            }
+
+            for (let i = 0; i < $initiative.children.length; i++){
+                $initiative.children[i].classList.remove('active')
+            }
+            document.querySelector('.init-'+index).classList.add('active')
+        })
+
+        $initiative.addEventListener('click', (e)=> {
+            if (e.target.classList.contains('btn-delete')) {
+                socket.emit('removeToken', e.target.dataset.index)
+                e.target.remove()
+            }
+        })
+    </script>
+
+</body>
+</html>

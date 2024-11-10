@@ -1,0 +1,31 @@
+#terminal {
+    box-sizing: border-box;
+    position: absolute;
+    top: -5rem;
+    left: 0;
+    right: 0;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0.2em;
+    background-color: rgba(0, 0, 0, 0.333);
+    color: limegreen;
+    font-family: monospace;
+    transition: top 0.25s, color 0.25s, background 0.25s;
+    outline: none;
+    border: none;
+}
+#terminal::selection {
+    background: rgb(0, 40, 0);
+    color: limegreen;
+}
+#terminal.error {
+    color: crimson;
+}
+#terminal.error::selection {
+    background: rgb(40,0,0)
+}
+#terminal:focus {
+    top: 0;
+    outline: none;
+    border: none;
+}
