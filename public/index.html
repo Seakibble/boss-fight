@@ -19,12 +19,34 @@
     </style>
 </head>
 <body>
-    <h1>INITIATIVE TRACKER</h1>
-    <ul>
-        <li><a href="/boss-fight.html">Boss Fight</a></li>
-        <li><a href="/init.html">Initiative Tracker</a></li>
-    </ul>
+    <div id="messages" class="messages">
+        <div class="defeated"><div>ENEMY VANQUISHED</div></div>
+    </div>
+
+    <div class="blackGradient">
+        <div class="headingWrapper">
+            <h1>welcome</h1>
+        </div>
+    </div>
+
+    <div id="bg">
+        <div class="background background1"></div>
+        <div class="background background2"></div>
+    </div>
+
+
+    <div class="portrait">
+        <img id="portrait" src="">
+    </div>
+    <input type="text" id="input" value=""  autocomplete="off" >
+    <div id="healthBars" class="hide"></div>
+
+    <script src="scripts/howler.min.js"></script>
     
+    <script src="data/backgrounds.js"></script>
+    <script src="data/bosses.js"></script>
+    <script src="scripts/script.js"></script>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();

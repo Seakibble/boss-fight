@@ -3,22 +3,57 @@ let $input = document.getElementById('terminal')
 let $blackGradient = document.querySelector('.blackGradient')
 let $portrait = document.getElementById('portrait')
 let $messages = document.getElementById('messages')
+let $background = document.getElementById('bg')
 
 // On pressing enter in the terminal, broadcast command to server.
+let cmds = []
+let cmdsIndex = 0
 $input.addEventListener('keyup', e => {
     if (e.key === 'Enter') {
+        $input.classList.remove('ghost')
         socket.emit('command', $input.value)
+        cmds.unshift($input.value)
+        cmdsIndex = 0
+    } else if (e.key == 'ArrowUp') {
+        cmdsIndex += 1
+        $input.classList.remove('error')
+        $input.classList.add('ghost')
+        if (cmdsIndex >= cmds.length) {
+            cmdsIndex = cmds.length - 1
+        }
+        $input.value = cmds[cmdsIndex]
+        
+    } else if (e.key == 'ArrowDown') {
+        cmdsIndex -= 1
+        $input.classList.remove('error')
+        $input.classList.add('ghost')
+        if (cmdsIndex < 0) {
+            cmdsIndex = 0
+        }
+        $input.value = cmds[cmdsIndex]
+        
     } else {
+        $input.classList.remove('ghost')
         $input.classList.remove('error')
     }
+})
+
+document.body.addEventListener('click', e => {
+    $input.focus()
 })
 
 function command(cmd) {
     let data = cmd.split(' ')
 
     // Check that there's an id for commands that require an id
-    if (!['victory','vic','reload','rel', 'add'].includes(data[0]) && bosses[data[1]] === undefined
+    if (!['victory','vic','reload','rel', 'add', 'vol', 'mute', 'unmute'].includes(data[0]) && bosses[data[1]] === undefined
         || data[0] == 'add' && bossTemplates[data[1]] === undefined) {
+        $input.classList.add('error')
+        return
+    } else if (data[0] == 'vol' && (isNaN(data[1]) || data[1] < 0 || data[1] > 1)) {
+        $input.classList.add('error')
+        return
+    } else if ((data[0] == 'dam' || data[0] == 'heal' || data[0] == 'temp') && (isNaN(data[2]) || data[2] < 0)) {
         $input.classList.add('error')
         return
     }
@@ -40,7 +75,7 @@ function command(cmd) {
             clearDamage(data[1])
             break
         case 'taunt':
-            taunt(data[1])
+            taunt(data[1], data[2])
             break
         case 'victory':
         case 'vic':
@@ -57,9 +92,24 @@ function command(cmd) {
         case 'sethp':
         case 'hp':
             setHP(data[1], data[2])
+            break
+        case 'vol':
+            setVolume(data[1])
+            break
+        case 'mute':
+            setVolume(0)
+            break
+        case 'unmute':
+            setVolume(1)
+            break
         default:
             $input.classList.add('error')
     }
+}
+
+let volume = 1
+function setVolume(x) {
+    Howler.volume(x)
 }
 
 function reload() {
@@ -71,20 +121,22 @@ function addHealthBar(id, name, hp) {
     if (bossTemplates[id]) {
         name = bossTemplates[id].name
         hp = bossTemplates[id].hp
+        bg = bossTemplates[id].bg
     } else {
-        name = name.replaceAll('_',' ')
+        name = name.replaceAll('_', ' ')
+        bg = 0
     }
 
     let $boss = document.createElement('div')
     $boss.classList.add('bossHealthBar')
     $boss.innerHTML = `
-<h2 class="name">${name}</h2>
-<h3 class="damageText" data-damage=0></h3>
-<h3 class="tempText"></h3>
-<div class='healthBar'>
-    <div class="hp"></div>
-    <div class="hpGhost"></div>
-</div>`
+        <h2 class="name">${name}</h2>
+        <h3 class="damageText" data-damage=0></h3>
+        <h3 class="tempText"></h3>
+        <div class='healthBar'>
+            <div class="hp"></div>
+            <div class="hpGhost"></div>
+        </div>`
     
     $healthBars.appendChild($boss)
 
@@ -93,7 +145,8 @@ function addHealthBar(id, name, hp) {
         max: parseInt(hp),
         temp: 0,
         el: $boss,
-        state: STATE.NORMAL
+        state: STATE.NORMAL,
+        bg: bg
     }
 
     setPortrait(id)
@@ -136,8 +189,10 @@ function setPortrait(id, state = undefined, duration = 0) {
         boss.state = STATE.DEAD
     } else if (boss.hp > boss.max / 2) {
         boss.state = STATE.NORMAL
+        $background.classList.remove('bloody')
     } else {
         boss.state = STATE.BLOODY
+        $background.classList.add('bloody')
     }
 
     if (state === undefined) {
@@ -169,19 +224,24 @@ function setPortrait(id, state = undefined, duration = 0) {
 
 
 function setBackground(id) {
-    document.body.classList.add('bg-'+id)
+    // document.body.classList.add('bg-'+id)
+    $background.innerHTML = bgs[bosses[id].bg]
 }
 function unsetBackground(id) {
-    document.body.classList.remove('bg-'+id)
+    // document.body.classList.remove('bg-'+id)
+    $background.innerHTML = ''
+    $background.classList.remove('bloody')
 }
 
 function setHP(id, hp) {
     let boss = bosses[id]
-    boss.hp = hp
+    boss.hp = parseInt(hp)
     updateBar(id)
     setPortrait(id)
 }
 
+let recentHurts = []
+let recentPanics = []
 function damage(id, amount = 0) {
     let boss = bosses[id]
     boss.temp -= amount
@@ -208,23 +268,60 @@ function damage(id, amount = 0) {
         SFX[id].music.fade(0.25, 0, 4000)
     } else if (boss.hp < boss.max / 2 || amount > boss.max / 5) {
         setTimeout(() => {
-            pick(SFX[id].panic).play()
+            let panic = null
+            do {
+                panic = pick(SFX[id].panic, true)
+            } while (recentPanics.includes(panic.num))
+            recentPanics.push(panic.num)
+            panic = panic.val
+            panic.play()
+            if (recentPanics.length > Math.floor(SFX[id].panic.length / 2)) {
+                recentPanics.shift()
+            }
         }, 75)
     } else {
         setTimeout(() => {
-            pick(SFX[id].hurt).play()
+            let hurt = null
+            do {
+                hurt = pick(SFX[id].hurt, true)
+            } while (recentHurts.includes(hurt.num))
+            recentHurts.push(hurt.num)
+            hurt = hurt.val
+            hurt.play()
+            if (recentHurts.length > Math.floor(SFX[id].hurt.length / 2)) {
+                recentHurts.shift()
+            }
         }, 75)
     }
 }
 
-function taunt(id) {
+let recentTaunts = []
+function taunt(id, num = undefined) {
     let boss = bosses[id]
-    let taunt = pick(SFX[id].taunt)
-    taunt.play()
-    console.log(taunt.duration())
 
-    setPortrait(id, STATE.TAUNT, taunt.duration()*1000)
+    let taunt = null
 
+    if (num !== undefined) {
+        taunt = SFX[id].taunt[num]
+        if (!recentTaunts.includes(num)) {
+            recentTaunts.push(num)
+        }
+    } else {
+        do {
+            taunt = pick(SFX[id].taunt, true)
+        } while (recentTaunts.includes(taunt.num))
+        recentTaunts.push(taunt.num)
+        taunt = taunt.val
+    }
+
+    if (recentTaunts.length > Math.floor(SFX[id].taunt.length / 2)) {
+        recentTaunts.shift()
+    }
+
+    if (taunt) {
+        taunt.play()
+        setPortrait(id, STATE.TAUNT, taunt.duration() * 1000)
+    }
 }
 
 function giveTempHP(id, amount) {
@@ -243,6 +340,14 @@ function giveTempHP(id, amount) {
 function heal(id, amount) {
     let boss = bosses[id]
     boss.hp += amount
+
+    if (boss.hp > 0 && $portrait.parentElement.classList.contains('defeat')) {
+        $portrait.parentElement.classList.remove('defeat')
+        SFX[id].music.stop()
+        SFX[id].music.volume(0.25)
+        SFX[id].music.play()
+    }
+
     if (boss.hp >= boss.max) {
         boss.hp = boss.max
         clearDamage(id)
@@ -265,13 +370,6 @@ function heal(id, amount) {
     }, 300)
 
     setPortrait(id, STATE.HEAL, 5000)
-
-    if (boss.hp > 0 && $portrait.parentElement.classList.contains('defeat')) {
-        $portrait.parentElement.classList.remove('defeat')
-        SFX[id].music.stop()
-        SFX[id].music.volume(0.25)
-        SFX[id].music.play()
-    }
 }
 
 function clearDamage(id) {
@@ -311,31 +409,31 @@ function showMessage(msg) {
 SFX = {}
 SFX.damage = new Howl({
     src: ['data/general/sfx/sword-strike.mp3'],
-    volume: 0.5,
+    volume: 0.5 * volume,
     preload: true
 })
 
 SFX.heal = new Howl({
     src: ['data/general/sfx/heal.mp3'],
-    volume: 0.5,
+    volume: 0.5 * volume,
     preload: true
 })
 
 SFX.intro = new Howl({
     src: ['data/general/sfx/intro.mp3'],
-    volume: 0.2,
+    volume: 0.2 * volume,
     preload: true
 })
 
 SFX.temp = new Howl({
     src: ['data/general/sfx/temp.mp3'],
-    volume: 0.5,
+    volume: 0.5 * volume,
     preload: true
 })
 
 SFX.victory = new Howl({
     src: ['data/general/sfx/victory.mp3'],
-    volume: 0.5,
+    volume: 0.5 * volume,
     preload: true
 })
 
@@ -345,41 +443,41 @@ function loadSFX(id) {
     SFX[id].taunt = []
     for (let i = 1; i <= bossTemplates[id].sfx.taunt; i++) {
         SFX[id].taunt.push(new Howl({
-            src: ['data/' + id +'/sfx/' + id +'-taunt-' + i + '.mp3'], volume: 1
+            src: ['data/' + id + '/sfx/' + id + '-taunt-' + i + '.mp3'], volume: 1 * volume
         }))
     }
 
     SFX[id].defeat = []
     for (let i = 1; i <= bossTemplates[id].sfx.defeat; i++) {
         SFX[id].defeat.push(new Howl({
-            src: ['data/' + id +'/sfx/' + id +'-defeat-' + i + '.mp3'], volume: 1
+            src: ['data/' + id + '/sfx/' + id + '-defeat-' + i + '.mp3'], volume: 1 * volume
         }))
     }
 
     SFX[id].hurt = []
     for (let i = 1; i <= bossTemplates[id].sfx.hurt; i++) {
         SFX[id].hurt.push(new Howl({
-            src: ['data/' + id +'/sfx/' + id +'-hurt-' + i + '.mp3'], volume: 0.75
+            src: ['data/' + id + '/sfx/' + id + '-hurt-' + i + '.mp3'], volume: 0.75 * volume
         }))
     }
 
     SFX[id].panic = []
     for (let i = 1; i <= bossTemplates[id].sfx.panic; i++) {
         SFX[id].panic.push(new Howl({
-            src: ['data/' + id +'/sfx/'+id+'-panic-' + i + '.mp3'], volume: 1
+            src: ['data/' + id + '/sfx/' + id + '-panic-' + i + '.mp3'], volume: 1 * volume
         }))
     }
 
     SFX[id].music = new Howl({
         src: ['data/' + id +'/sfx/'+id+'-music.mp3'],
-        volume: 0.25,
+        volume: 0.25 * volume,
         preload: true,
         loop: true
     })
 
     SFX[id].intro = new Howl({
         src: ['data/' + id + '/sfx/' + id + '-intro.mp3'],
-        volume: 1,
+        volume: 1 * volume,
         preload: true,
     })
 }
@@ -389,6 +487,13 @@ function loadSFX(id) {
 
 
 
-function pick(arr) {
+function pick(arr, getNum = false) {
+    if (getNum) {
+        let num = Math.floor(Math.random() * arr.length)
+        return {
+            val: arr[num],
+            num: num
+        }
+    }
     return arr[Math.floor(Math.random() * arr.length)]
 }
